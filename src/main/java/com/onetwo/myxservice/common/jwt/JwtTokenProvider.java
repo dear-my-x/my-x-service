@@ -1,6 +1,7 @@
 package com.onetwo.myxservice.common.jwt;
 
 import com.onetwo.myxservice.common.exceptions.TokenValidationException;
+import com.onetwo.myxservice.domain.RoleNames;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
@@ -11,10 +12,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
 import java.util.Base64;
+import java.util.HashSet;
+import java.util.Set;
 
 @Component
 @Slf4j
@@ -33,12 +38,21 @@ public class JwtTokenProvider implements TokenProvider {
         String encodedKey = Base64.getEncoder().encodeToString(secretKey.getBytes());
         key = Keys.hmacShaKeyFor(encodedKey.getBytes());
     }
-    
+
     @Override
     public Authentication getAuthentication(String token) {
         Claims claims = getClaimsByToken(token);
         String userId = claims.getSubject();
-        return new UsernamePasswordAuthenticationToken(userId, token);
+
+        Set<GrantedAuthority> authorities = getGrantedAuthoritiesByUserId(userId);
+
+        return new UsernamePasswordAuthenticationToken(userId, token, authorities);
+    }
+
+    private Set<GrantedAuthority> getGrantedAuthoritiesByUserId(String userId) {
+        Set<GrantedAuthority> authorities = new HashSet<>();
+        authorities.add(new SimpleGrantedAuthority(RoleNames.ROLE_USER.getValue()));
+        return authorities;
     }
 
     @Override
