@@ -2,6 +2,7 @@ package com.onetwo.myxservice.application.port.in.usecase;
 
 import com.onetwo.myxservice.application.port.in.command.RegisterMyXCommand;
 import com.onetwo.myxservice.application.port.in.response.RegisterMyXResponseDto;
+import com.onetwo.myxservice.application.port.out.MyXRegisterEventPublisherPort;
 import com.onetwo.myxservice.application.port.out.ReadMyXPort;
 import com.onetwo.myxservice.application.port.out.RegisterMyXPort;
 import com.onetwo.myxservice.application.service.converter.MyXUseCaseConverter;
@@ -40,6 +41,9 @@ class RegisterMyXUseCaseTest {
 
     @Mock
     private MyXUseCaseConverter myXUseCaseConverter;
+
+    @Mock
+    private MyXRegisterEventPublisherPort myXRegisterEventPublisherPort;
 
     private final String userId = "testUserId";
     private final String myXName = "정정일";

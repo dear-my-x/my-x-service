@@ -60,4 +60,16 @@ public class MyX extends BaseDomain {
         setCreatedAt(Instant.now());
         setCreateUser(this.userId);
     }
+
+    public void deleteMyX() {
+        this.state = true;
+    }
+
+    public boolean isDeleted() {
+        return state;
+    }
+
+    public boolean isNotDeleted() {
+        return !state;
+    }
 }

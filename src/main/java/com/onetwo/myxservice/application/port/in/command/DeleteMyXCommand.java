@@ -8,7 +8,7 @@ import lombok.Getter;
 import java.time.Instant;
 
 @Getter
-public final class RegisterMyXCommand extends SelfValidating<RegisterMyXCommand> {
+public final class DeleteMyXCommand extends SelfValidating<DeleteMyXCommand> {
 
     @NotEmpty
     private final String userId;
@@ -19,7 +19,7 @@ public final class RegisterMyXCommand extends SelfValidating<RegisterMyXCommand>
     @NotNull
     private final Instant xsBirth;
 
-    public RegisterMyXCommand(String userId, String xsName, Instant xsBirth) {
+    public DeleteMyXCommand(String userId, String xsName, Instant xsBirth) {
         this.userId = userId;
         this.xsName = xsName;
         this.xsBirth = xsBirth;

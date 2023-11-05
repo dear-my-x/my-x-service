@@ -3,7 +3,9 @@ package com.onetwo.myxservice.adapter.in.web.myx.api;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onetwo.myxservice.adapter.in.web.config.TestConfig;
 import com.onetwo.myxservice.adapter.in.web.myx.mapper.MyXDtoMapper;
+import com.onetwo.myxservice.adapter.in.web.myx.request.DeleteMyXRequest;
 import com.onetwo.myxservice.adapter.in.web.myx.request.RegisterMyXRequest;
+import com.onetwo.myxservice.application.port.in.usecase.DeleteMyXUseCase;
 import com.onetwo.myxservice.application.port.in.usecase.RegisterMyXUseCase;
 import com.onetwo.myxservice.common.GlobalUrl;
 import com.onetwo.myxservice.common.config.SecurityConfig;
@@ -24,6 +26,7 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import java.time.Instant;
 
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -45,6 +48,9 @@ class MyXControllerValidationTest {
 
     @MockBean
     private RegisterMyXUseCase registerMyXUseCase;
+
+    @MockBean
+    private DeleteMyXUseCase deleteMyXUseCase;
 
     @MockBean
     private MyXDtoMapper myXDtoMapper;
@@ -83,6 +89,44 @@ class MyXControllerValidationTest {
         //when
         ResultActions resultActions = mockMvc.perform(
                 post(GlobalUrl.MY_X_ROOT)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(registerMyXRequest))
+                        .accept(MediaType.APPLICATION_JSON));
+        //then
+        resultActions.andExpect(status().isBadRequest())
+                .andDo(print());
+    }
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    @WithMockUser(username = userId)
+    @DisplayName("[단위][Web Adapter] MyX 삭제 my x name validation fail - 실패 테스트")
+    void deleteMyXNameValidationFailTest(String testMyXName) throws Exception {
+        //given
+        DeleteMyXRequest registerMyXRequest = new DeleteMyXRequest(testMyXName, myXBirth);
+
+        //when
+        ResultActions resultActions = mockMvc.perform(
+                delete(GlobalUrl.MY_X_ROOT)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(registerMyXRequest))
+                        .accept(MediaType.APPLICATION_JSON));
+        //then
+        resultActions.andExpect(status().isBadRequest())
+                .andDo(print());
+    }
+
+    @ParameterizedTest
+    @NullSource
+    @WithMockUser(username = userId)
+    @DisplayName("[단위][Web Adapter] MyX 삭제 my x brith validation fail - 실패 테스트")
+    void deleteMyXBirthValidationFailTest(Instant testMyXBirth) throws Exception {
+        //given
+        DeleteMyXRequest registerMyXRequest = new DeleteMyXRequest(myXName, testMyXBirth);
+
+        //when
+        ResultActions resultActions = mockMvc.perform(
+                delete(GlobalUrl.MY_X_ROOT)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(registerMyXRequest))
                         .accept(MediaType.APPLICATION_JSON));

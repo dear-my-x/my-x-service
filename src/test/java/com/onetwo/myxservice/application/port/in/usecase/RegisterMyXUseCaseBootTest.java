@@ -3,7 +3,6 @@ package com.onetwo.myxservice.application.port.in.usecase;
 import com.onetwo.myxservice.application.port.in.command.RegisterMyXCommand;
 import com.onetwo.myxservice.application.port.in.response.RegisterMyXResponseDto;
 import com.onetwo.myxservice.application.port.out.RegisterMyXPort;
-import com.onetwo.myxservice.application.service.service.MyXService;
 import com.onetwo.myxservice.common.GlobalStatus;
 import com.onetwo.myxservice.common.exceptions.ResourceAlreadyExistsException;
 import com.onetwo.myxservice.common.exceptions.ResourceAlreadyFullException;
@@ -22,7 +21,7 @@ import java.time.Instant;
 class RegisterMyXUseCaseBootTest {
 
     @Autowired
-    private MyXService registerMyXUseCase;
+    private RegisterMyXUseCase registerMyXUseCase;
 
     @Autowired
     private RegisterMyXPort registerMyXPort;
