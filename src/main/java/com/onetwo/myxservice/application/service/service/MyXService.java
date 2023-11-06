@@ -1,10 +1,13 @@
 package com.onetwo.myxservice.application.service.service;
 
 import com.onetwo.myxservice.application.port.in.command.DeleteMyXCommand;
+import com.onetwo.myxservice.application.port.in.command.MyXDetailsCommand;
 import com.onetwo.myxservice.application.port.in.command.RegisterMyXCommand;
 import com.onetwo.myxservice.application.port.in.response.DeleteMyXResponseDto;
+import com.onetwo.myxservice.application.port.in.response.MyXDetailResponseDto;
 import com.onetwo.myxservice.application.port.in.response.RegisterMyXResponseDto;
 import com.onetwo.myxservice.application.port.in.usecase.DeleteMyXUseCase;
+import com.onetwo.myxservice.application.port.in.usecase.ReadMyXUseCase;
 import com.onetwo.myxservice.application.port.in.usecase.RegisterMyXUseCase;
 import com.onetwo.myxservice.application.port.out.MyXRegisterEventPublisherPort;
 import com.onetwo.myxservice.application.port.out.ReadMyXPort;
@@ -26,7 +29,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class MyXService implements RegisterMyXUseCase, DeleteMyXUseCase {
+public class MyXService implements RegisterMyXUseCase, DeleteMyXUseCase, ReadMyXUseCase {
 
     private final ReadMyXPort readMyXPort;
     private final RegisterMyXPort registerMyXPort;
@@ -101,5 +104,18 @@ public class MyXService implements RegisterMyXUseCase, DeleteMyXUseCase {
         updateMyXPort.updateMyX(myX);
 
         return myXUseCaseConverter.myXToDeleteMyXResponseDto(myX);
+    }
+
+    /**
+     * Get about My X detail information use case
+     *
+     * @param myXDetailsCommand request user id
+     * @return user's my x list
+     */
+    @Override
+    public List<MyXDetailResponseDto> getMyXDetails(MyXDetailsCommand myXDetailsCommand) {
+        List<MyX> myXList = readMyXPort.findByUserId(myXDetailsCommand.getUserId());
+
+        return myXList.stream().map(myXUseCaseConverter::myXToDetailResponseDto).toList();
     }
 }

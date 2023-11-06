@@ -26,8 +26,7 @@ import java.time.Instant;
 import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
 import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -50,7 +49,7 @@ class MyXControllerBootTest {
     @Autowired
     private RegisterMyXUseCase registerMyXUseCase;
 
-    private static final String userId = "testUserId";
+    private final String userId = "testUserId";
     private final String myXName = "정정일";
     private final Instant myXBirth = Instant.parse("1998-04-28T00:00:00Z");
 
@@ -124,6 +123,47 @@ class MyXControllerBootTest {
                                 )
                         )
                 );
-        ;
+    }
+
+    @Test
+    @Transactional
+    @DisplayName("[통합][Web Adapter] MyX list 조회 - 성공 테스트")
+    void getMyXDetailsSuccessTest() throws Exception {
+        //given
+        RegisterMyXCommand registerMyXCommand = new RegisterMyXCommand(userId, myXName, myXBirth);
+        registerMyXUseCase.registerMyX(registerMyXCommand);
+
+        String secondMyXName = "정정이";
+
+        RegisterMyXCommand registerMyXCommandSecond = new RegisterMyXCommand(userId, secondMyXName, myXBirth);
+        registerMyXUseCase.registerMyX(registerMyXCommandSecond);
+
+        //when
+        ResultActions resultActions = mockMvc.perform(
+                get(GlobalUrl.MY_X_ROOT)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .headers(testHeader.getRequestHeaderWithMockAccessKey(userId))
+                        .accept(MediaType.APPLICATION_JSON));
+        //then
+        resultActions.andExpect(status().isOk())
+                .andDo(print())
+                .andDo(document("get-my-x",
+                                requestHeaders(
+                                        headerWithName(GlobalStatus.ACCESS_ID).description("서버 Access id"),
+                                        headerWithName(GlobalStatus.ACCESS_KEY).description("서버 Access key"),
+                                        headerWithName(GlobalStatus.ACCESS_TOKEN).description("유저의 access-token")
+                                ),
+                                responseFields(
+                                        fieldWithPath("myXDetailResponseDtoList[]").type(JsonFieldType.ARRAY).description("My X 리스트"),
+                                        fieldWithPath("myXDetailResponseDtoList[].id").type(JsonFieldType.NUMBER).description("My X 고유 id"),
+                                        fieldWithPath("myXDetailResponseDtoList[].userId").type(JsonFieldType.STRING).description("My X를 등록한 User id"),
+                                        fieldWithPath("myXDetailResponseDtoList[].xsName").type(JsonFieldType.STRING).description("My X의 이름"),
+                                        fieldWithPath("myXDetailResponseDtoList[].xsBirth").type(JsonFieldType.STRING).description("My X의 생년월일"),
+                                        fieldWithPath("myXDetailResponseDtoList[].isConnected").type(JsonFieldType.BOOLEAN).description("My X 상호 연결 여부"),
+                                        fieldWithPath("myXDetailResponseDtoList[].xsUserId").type(JsonFieldType.STRING).description("연결된 My X의 user Id"),
+                                        fieldWithPath("myXDetailResponseDtoList[].state").type(JsonFieldType.BOOLEAN).description("My X 삭제 상태")
+                                )
+                        )
+                );
     }
 }

@@ -6,12 +6,16 @@ import com.onetwo.myxservice.adapter.in.web.myx.mapper.MyXDtoMapper;
 import com.onetwo.myxservice.adapter.in.web.myx.request.DeleteMyXRequest;
 import com.onetwo.myxservice.adapter.in.web.myx.request.RegisterMyXRequest;
 import com.onetwo.myxservice.adapter.in.web.myx.response.DeleteMyXResponse;
+import com.onetwo.myxservice.adapter.in.web.myx.response.MyXDetailsResponse;
 import com.onetwo.myxservice.adapter.in.web.myx.response.RegisterMyXResponse;
 import com.onetwo.myxservice.application.port.in.command.DeleteMyXCommand;
+import com.onetwo.myxservice.application.port.in.command.MyXDetailsCommand;
 import com.onetwo.myxservice.application.port.in.command.RegisterMyXCommand;
 import com.onetwo.myxservice.application.port.in.response.DeleteMyXResponseDto;
+import com.onetwo.myxservice.application.port.in.response.MyXDetailResponseDto;
 import com.onetwo.myxservice.application.port.in.response.RegisterMyXResponseDto;
 import com.onetwo.myxservice.application.port.in.usecase.DeleteMyXUseCase;
+import com.onetwo.myxservice.application.port.in.usecase.ReadMyXUseCase;
 import com.onetwo.myxservice.application.port.in.usecase.RegisterMyXUseCase;
 import com.onetwo.myxservice.common.GlobalUrl;
 import com.onetwo.myxservice.common.config.SecurityConfig;
@@ -29,12 +33,13 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -58,6 +63,9 @@ class MyXControllerTest {
 
     @MockBean
     private DeleteMyXUseCase deleteMyXUseCase;
+
+    @MockBean
+    private ReadMyXUseCase readMyXUseCase;
 
     @MockBean
     private MyXDtoMapper myXDtoMapper;
@@ -108,6 +116,44 @@ class MyXControllerTest {
                 delete(GlobalUrl.MY_X_ROOT)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(deleteMyXRequest))
+                        .accept(MediaType.APPLICATION_JSON));
+        //then
+        resultActions.andExpect(status().isOk())
+                .andDo(print());
+    }
+
+    @Test
+    @WithMockUser(username = userId)
+    @DisplayName("[단위][Web Adapter] MyX list 조회 - 성공 테스트")
+    void getMyXDetailsSuccessTest() throws Exception {
+        //given
+        MyXDetailsCommand myXDetailsCommand = new MyXDetailsCommand(userId);
+
+        List<MyXDetailResponseDto> deleteMyXResponseDtoList = new ArrayList<>();
+
+        for (int i = 0; i < 5; i++) {
+            deleteMyXResponseDtoList.add(
+                    new MyXDetailResponseDto(
+                            i,
+                            userId + i,
+                            myXName + i,
+                            myXBirth,
+                            false,
+                            null,
+                            false
+                    )
+            );
+        }
+
+        MyXDetailsResponse myXDetailsResponse = new MyXDetailsResponse(deleteMyXResponseDtoList);
+
+        when(myXDtoMapper.getMyXDetailsRequestToCommand(anyString())).thenReturn(myXDetailsCommand);
+        when(readMyXUseCase.getMyXDetails(any(MyXDetailsCommand.class))).thenReturn(deleteMyXResponseDtoList);
+        when(myXDtoMapper.dtoToMyXDetailsResponse(any(List.class))).thenReturn(myXDetailsResponse);
+        //when
+        ResultActions resultActions = mockMvc.perform(
+                get(GlobalUrl.MY_X_ROOT)
+                        .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON));
         //then
         resultActions.andExpect(status().isOk())

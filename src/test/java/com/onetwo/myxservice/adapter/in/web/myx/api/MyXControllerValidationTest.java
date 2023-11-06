@@ -6,6 +6,7 @@ import com.onetwo.myxservice.adapter.in.web.myx.mapper.MyXDtoMapper;
 import com.onetwo.myxservice.adapter.in.web.myx.request.DeleteMyXRequest;
 import com.onetwo.myxservice.adapter.in.web.myx.request.RegisterMyXRequest;
 import com.onetwo.myxservice.application.port.in.usecase.DeleteMyXUseCase;
+import com.onetwo.myxservice.application.port.in.usecase.ReadMyXUseCase;
 import com.onetwo.myxservice.application.port.in.usecase.RegisterMyXUseCase;
 import com.onetwo.myxservice.common.GlobalUrl;
 import com.onetwo.myxservice.common.config.SecurityConfig;
@@ -51,6 +52,9 @@ class MyXControllerValidationTest {
 
     @MockBean
     private DeleteMyXUseCase deleteMyXUseCase;
+
+    @MockBean
+    private ReadMyXUseCase readMyXUseCase;
 
     @MockBean
     private MyXDtoMapper myXDtoMapper;

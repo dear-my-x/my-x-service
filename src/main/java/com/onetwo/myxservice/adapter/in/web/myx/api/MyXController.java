@@ -4,12 +4,16 @@ import com.onetwo.myxservice.adapter.in.web.myx.mapper.MyXDtoMapper;
 import com.onetwo.myxservice.adapter.in.web.myx.request.DeleteMyXRequest;
 import com.onetwo.myxservice.adapter.in.web.myx.request.RegisterMyXRequest;
 import com.onetwo.myxservice.adapter.in.web.myx.response.DeleteMyXResponse;
+import com.onetwo.myxservice.adapter.in.web.myx.response.MyXDetailsResponse;
 import com.onetwo.myxservice.adapter.in.web.myx.response.RegisterMyXResponse;
 import com.onetwo.myxservice.application.port.in.command.DeleteMyXCommand;
+import com.onetwo.myxservice.application.port.in.command.MyXDetailsCommand;
 import com.onetwo.myxservice.application.port.in.command.RegisterMyXCommand;
 import com.onetwo.myxservice.application.port.in.response.DeleteMyXResponseDto;
+import com.onetwo.myxservice.application.port.in.response.MyXDetailResponseDto;
 import com.onetwo.myxservice.application.port.in.response.RegisterMyXResponseDto;
 import com.onetwo.myxservice.application.port.in.usecase.DeleteMyXUseCase;
+import com.onetwo.myxservice.application.port.in.usecase.ReadMyXUseCase;
 import com.onetwo.myxservice.application.port.in.usecase.RegisterMyXUseCase;
 import com.onetwo.myxservice.common.GlobalUrl;
 import jakarta.validation.Valid;
@@ -17,10 +21,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -28,7 +31,7 @@ public class MyXController {
 
     private final RegisterMyXUseCase registerMyXUseCase;
     private final DeleteMyXUseCase deleteMyXUseCase;
-
+    private final ReadMyXUseCase readMyXUseCase;
     private final MyXDtoMapper myXDtoMapper;
 
     /**
@@ -57,5 +60,18 @@ public class MyXController {
         DeleteMyXCommand deleteMyXCommand = myXDtoMapper.deleteRequestToCommand(userId, deleteMyXRequest);
         DeleteMyXResponseDto deleteMyXResponseDto = deleteMyXUseCase.deleteMyX(deleteMyXCommand);
         return ResponseEntity.ok().body(myXDtoMapper.dtoToDeleteResponse(deleteMyXResponseDto));
+    }
+
+    /**
+     * Get about My X detail information inbound adapter
+     *
+     * @param userId user authentication id
+     * @return user's my x list
+     */
+    @GetMapping(GlobalUrl.MY_X_ROOT)
+    public ResponseEntity<MyXDetailsResponse> getMyXDetails(@AuthenticationPrincipal String userId) {
+        MyXDetailsCommand myXDetailsCommand = myXDtoMapper.getMyXDetailsRequestToCommand(userId);
+        List<MyXDetailResponseDto> myXDetailResponseDtoList = readMyXUseCase.getMyXDetails(myXDetailsCommand);
+        return ResponseEntity.ok().body(myXDtoMapper.dtoToMyXDetailsResponse(myXDetailResponseDtoList));
     }
 }

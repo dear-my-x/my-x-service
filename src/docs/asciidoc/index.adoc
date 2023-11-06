@@ -94,3 +94,33 @@ include::{snippets}/delete-my-x/response-body.adoc[]
 http-response
 
 include::{snippets}/delete-my-x/http-response.adoc[]
+
+=== Get My X Details
+
+http-request
+
+include::{snippets}/get-my-x/http-request.adoc[]
+
+request-headers
+
+include::{snippets}/get-my-x/request-headers.adoc[]
+
+request-body
+
+include::{snippets}/get-my-x/request-body.adoc[]
+
+curl-request
+
+include::{snippets}/get-my-x/curl-request.adoc[]
+
+response-fields
+
+include::{snippets}/get-my-x/response-fields.adoc[]
+
+response-body
+
+include::{snippets}/get-my-x/response-body.adoc[]
+
+http-response
+
+include::{snippets}/get-my-x/http-response.adoc[]
