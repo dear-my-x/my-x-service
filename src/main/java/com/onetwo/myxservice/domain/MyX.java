@@ -2,6 +2,7 @@ package com.onetwo.myxservice.domain;
 
 import com.onetwo.myxservice.adapter.out.persistence.entity.MyXEntity;
 import com.onetwo.myxservice.application.port.in.command.RegisterMyXCommand;
+import com.onetwo.myxservice.application.port.in.command.UpdateMyXCommand;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -24,6 +25,8 @@ public class MyX extends BaseDomain {
 
     private String xsUserId;
 
+    private Instant connectedDate;
+
     private boolean state;
 
     public static MyX entityToDomain(MyXEntity myXEntity) {
@@ -34,6 +37,7 @@ public class MyX extends BaseDomain {
                 myXEntity.getXsBirth(),
                 myXEntity.getIsConnected(),
                 myXEntity.getXsUserId(),
+                myXEntity.getConnectedDate(),
                 myXEntity.getState());
 
         myX.setMetaDataByEntity(myXEntity);
@@ -48,6 +52,7 @@ public class MyX extends BaseDomain {
                 registerMyXCommand.getXsName(),
                 registerMyXCommand.getXsBirth(),
                 false,
+                null,
                 null,
                 false);
 
@@ -71,5 +76,20 @@ public class MyX extends BaseDomain {
 
     public boolean isNotDeleted() {
         return !state;
+    }
+
+    public void updateMyX(UpdateMyXCommand updateMyXCommand) {
+        this.xsName = updateMyXCommand.getXsName();
+        this.xsBirth = updateMyXCommand.getXsBirth();
+        setUpdatedAt(Instant.now());
+        setUpdateUser(updateMyXCommand.getUserId());
+    }
+
+    public void connectMyX(MyX connectedMyX) {
+        this.isConnected = true;
+        this.connectedDate = Instant.now();
+        this.xsUserId = connectedMyX.getUserId();
+
+        if (!connectedMyX.isConnected()) connectedMyX.connectMyX(this);
     }
 }

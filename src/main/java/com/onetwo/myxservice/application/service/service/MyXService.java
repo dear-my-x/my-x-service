@@ -91,22 +91,26 @@ public class MyXService implements RegisterMyXUseCase, DeleteMyXUseCase, ReadMyX
     @Override
     @Transactional
     public DeleteMyXResponseDto deleteMyX(DeleteMyXCommand deleteMyXCommand) {
-        Optional<MyX> optionalMyX = readMyXPort.findById(deleteMyXCommand.getMyXId());
-
-        if (optionalMyX.isEmpty()) throw new NotFoundResourceException("My x dose not exist");
-
-        MyX myX = optionalMyX.get();
+        MyX myX = checkMyXExistAndGetMyX(deleteMyXCommand.getMyXId());
 
         if (isRequestUserAndMyXRegisterUserNotSame(deleteMyXCommand.getUserId(), myX))
             throw new BadRequestException("User is not same");
-
-        if (myX.isDeleted()) throw new BadRequestException("My x already deleted");
 
         myX.deleteMyX();
 
         updateMyXPort.updateMyX(myX);
 
         return myXUseCaseConverter.myXToDeleteMyXResponseDto(myX);
+    }
+
+    private MyX checkMyXExistAndGetMyX(Long myXId) {
+        Optional<MyX> optionalMyX = readMyXPort.findById(myXId);
+
+        if (optionalMyX.isEmpty()) throw new NotFoundResourceException("My x dose not exist");
+
+        if (optionalMyX.get().isDeleted()) throw new BadRequestException("My x already deleted");
+
+        return optionalMyX.get();
     }
 
     private boolean isRequestUserAndMyXRegisterUserNotSame(String userId, MyX myX) {
@@ -126,10 +130,27 @@ public class MyXService implements RegisterMyXUseCase, DeleteMyXUseCase, ReadMyX
         return myXList.stream().map(myXUseCaseConverter::myXToDetailResponseDto).toList();
     }
 
+    /**
+     * Update My X use case,
+     * update my x data to persistence
+     *
+     * @param updateMyXCommand Request update my x information
+     * @return Boolean about update success
+     */
     @Override
     public UpdateMyXResponseDto updateMyX(UpdateMyXCommand updateMyXCommand) {
-        Optional<MyX> optionalMyX = readMyXPort.findById(updateMyXCommand.getMyXId());
+        MyX myX = checkMyXExistAndGetMyX(updateMyXCommand.getMyXId());
 
-        return null;
+        if (isRequestUserAndMyXRegisterUserNotSame(updateMyXCommand.getUserId(), myX))
+            throw new BadRequestException("User is not same");
+
+        if (myX.isConnected())
+            throw new BadRequestException("My X already connected. It's can't update. There only can delete");
+
+        myX.updateMyX(updateMyXCommand);
+
+        updateMyXPort.updateMyX(myX);
+
+        return myXUseCaseConverter.myXToUpdateResponseDto(true);
     }
 }

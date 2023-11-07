@@ -105,8 +105,6 @@ class DeleteMyXUseCaseTest {
         RegisterMyXCommand registerMyXCommand = new RegisterMyXCommand(userId, myXName, myXBirth);
         MyX myX = MyX.createNewMyXByCommand(registerMyXCommand);
 
-        myX.deleteMyX();
-
         given(readMyXPort.findById(anyLong())).willReturn(Optional.of(myX));
 
         //when then

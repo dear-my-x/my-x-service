@@ -5,6 +5,7 @@ import com.onetwo.myxservice.adapter.in.web.config.TestConfig;
 import com.onetwo.myxservice.adapter.in.web.myx.mapper.MyXDtoMapper;
 import com.onetwo.myxservice.adapter.in.web.myx.request.DeleteMyXRequest;
 import com.onetwo.myxservice.adapter.in.web.myx.request.RegisterMyXRequest;
+import com.onetwo.myxservice.adapter.in.web.myx.request.UpdateMyXRequest;
 import com.onetwo.myxservice.application.port.in.usecase.DeleteMyXUseCase;
 import com.onetwo.myxservice.application.port.in.usecase.ReadMyXUseCase;
 import com.onetwo.myxservice.application.port.in.usecase.RegisterMyXUseCase;
@@ -28,8 +29,7 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import java.time.Instant;
 
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -110,15 +110,72 @@ class MyXControllerValidationTest {
     @NullSource
     @WithMockUser(username = userId)
     @DisplayName("[단위][Web Adapter] MyX 삭제 my x name validation fail - 실패 테스트")
-    void deleteMyXNameValidationFailTest(Long myXId) throws Exception {
+    void deleteMyXNameValidationFailTest(Long testMyXId) throws Exception {
         //given
-        DeleteMyXRequest registerMyXRequest = new DeleteMyXRequest(myXId);
+        DeleteMyXRequest registerMyXRequest = new DeleteMyXRequest(testMyXId);
 
         //when
         ResultActions resultActions = mockMvc.perform(
                 delete(GlobalUrl.MY_X_ROOT)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(registerMyXRequest))
+                        .accept(MediaType.APPLICATION_JSON));
+        //then
+        resultActions.andExpect(status().isBadRequest())
+                .andDo(print());
+    }
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    @WithMockUser(username = userId)
+    @DisplayName("[단위][Web Adapter] MyX 수정 my x name validation fail - 실패 테스트")
+    void updateMyXNameValidationFailTest(String testMyXName) throws Exception {
+        //given
+        UpdateMyXRequest updateMyXRequest = new UpdateMyXRequest(myXId, testMyXName, myXBirth);
+
+        //when
+        ResultActions resultActions = mockMvc.perform(
+                put(GlobalUrl.MY_X_ROOT)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateMyXRequest))
+                        .accept(MediaType.APPLICATION_JSON));
+        //then
+        resultActions.andExpect(status().isBadRequest())
+                .andDo(print());
+    }
+
+    @ParameterizedTest
+    @NullSource
+    @WithMockUser(username = userId)
+    @DisplayName("[단위][Web Adapter] MyX 수정 my x brith validation fail - 실패 테스트")
+    void updateMyXBirthValidationFailTest(Instant testMyXBirth) throws Exception {
+        //given
+        UpdateMyXRequest updateMyXRequest = new UpdateMyXRequest(myXId, myXName, testMyXBirth);
+
+        //when
+        ResultActions resultActions = mockMvc.perform(
+                put(GlobalUrl.MY_X_ROOT)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateMyXRequest))
+                        .accept(MediaType.APPLICATION_JSON));
+        //then
+        resultActions.andExpect(status().isBadRequest())
+                .andDo(print());
+    }
+
+    @ParameterizedTest
+    @NullSource
+    @WithMockUser(username = userId)
+    @DisplayName("[단위][Web Adapter] MyX 수정 my x name validation fail - 실패 테스트")
+    void updateMyXNameValidationFailTest(Long testMyXId) throws Exception {
+        //given
+        UpdateMyXRequest updateMyXRequest = new UpdateMyXRequest(testMyXId, myXName, myXBirth);
+
+        //when
+        ResultActions resultActions = mockMvc.perform(
+                put(GlobalUrl.MY_X_ROOT)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateMyXRequest))
                         .accept(MediaType.APPLICATION_JSON));
         //then
         resultActions.andExpect(status().isBadRequest())

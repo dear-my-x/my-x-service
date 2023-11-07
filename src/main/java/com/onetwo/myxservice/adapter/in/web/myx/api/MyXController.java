@@ -81,6 +81,13 @@ public class MyXController {
         return ResponseEntity.ok().body(myXDtoMapper.dtoToMyXDetailsResponse(myXDetailResponseDtoList));
     }
 
+    /**
+     * Update My X inbound adapter
+     *
+     * @param updateMyXRequest Request update my x information
+     * @param userId           user authentication id
+     * @return Boolean about update success
+     */
     @PutMapping(GlobalUrl.MY_X_ROOT)
     public ResponseEntity<UpdateMyXResponse> updateMyX(@RequestBody @Valid UpdateMyXRequest updateMyXRequest, @AuthenticationPrincipal String userId) {
         UpdateMyXCommand updateMyXCommand = myXDtoMapper.updateRequestToCommand(userId, updateMyXRequest);

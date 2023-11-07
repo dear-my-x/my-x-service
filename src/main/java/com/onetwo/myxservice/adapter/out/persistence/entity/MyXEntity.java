@@ -7,6 +7,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters;
 
 import java.time.Instant;
 
@@ -28,11 +29,16 @@ public class MyXEntity extends BaseEntity {
     private String xsName;
 
     @Column(nullable = false)
+    @Convert(converter = Jsr310JpaConverters.InstantConverter.class)
     private Instant xsBirth;
 
     @Column(nullable = false, length = 1)
     @Convert(converter = BooleanNumberConverter.class)
     private Boolean isConnected;
+
+    @Column
+    @Convert(converter = Jsr310JpaConverters.InstantConverter.class)
+    private Instant connectedDate;
 
     @Column
     private String xsUserId;
@@ -41,12 +47,13 @@ public class MyXEntity extends BaseEntity {
     @Convert(converter = BooleanNumberConverter.class)
     private Boolean state;
 
-    public MyXEntity(Long id, String userId, String xsName, Instant xsBirth, Boolean isConnected, String xsUserId, Boolean state) {
+    public MyXEntity(Long id, String userId, String xsName, Instant xsBirth, Boolean isConnected, Instant connectedDate, String xsUserId, Boolean state) {
         this.id = id;
         this.userId = userId;
         this.xsName = xsName;
         this.xsBirth = xsBirth;
         this.isConnected = isConnected;
+        this.connectedDate = connectedDate;
         this.xsUserId = xsUserId;
         this.state = state;
     }
@@ -58,6 +65,7 @@ public class MyXEntity extends BaseEntity {
                 newMyX.getXsName(),
                 newMyX.getXsBirth(),
                 newMyX.isConnected(),
+                newMyX.getConnectedDate(),
                 newMyX.getXsUserId(),
                 newMyX.isState()
         );

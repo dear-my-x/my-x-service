@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onetwo.myxservice.adapter.in.web.config.TestHeader;
 import com.onetwo.myxservice.adapter.in.web.myx.request.DeleteMyXRequest;
 import com.onetwo.myxservice.adapter.in.web.myx.request.RegisterMyXRequest;
+import com.onetwo.myxservice.adapter.in.web.myx.request.UpdateMyXRequest;
 import com.onetwo.myxservice.application.port.in.command.RegisterMyXCommand;
 import com.onetwo.myxservice.application.port.in.usecase.RegisterMyXUseCase;
 import com.onetwo.myxservice.application.port.out.RegisterMyXPort;
@@ -122,7 +123,7 @@ class MyXControllerBootTest {
                                         headerWithName(GlobalStatus.ACCESS_TOKEN).description("유저의 access-token")
                                 ),
                                 requestFields(
-                                        fieldWithPath("myXId").type(JsonFieldType.NUMBER).description("My X ID")
+                                        fieldWithPath("myXId").type(JsonFieldType.NUMBER).description("삭제할 My X ID")
                                 ),
                                 responseFields(
                                         fieldWithPath("isDeleteSuccess").type(JsonFieldType.BOOLEAN).description("삭제 완료 여부")
@@ -168,6 +169,45 @@ class MyXControllerBootTest {
                                         fieldWithPath("myXDetailResponseDtoList[].isConnected").type(JsonFieldType.BOOLEAN).description("My X 상호 연결 여부"),
                                         fieldWithPath("myXDetailResponseDtoList[].xsUserId").type(JsonFieldType.STRING).description("연결된 My X의 user Id"),
                                         fieldWithPath("myXDetailResponseDtoList[].state").type(JsonFieldType.BOOLEAN).description("My X 삭제 상태")
+                                )
+                        )
+                );
+    }
+
+    @Test
+    @Transactional
+    @DisplayName("[통합][Web Adapter] MyX 수정 - 성공 테스트")
+    void updateMyXSuccessTest() throws Exception {
+        //given
+        RegisterMyXCommand registerMyXCommand = new RegisterMyXCommand(userId, myXName, myXBirth);
+        MyX newMyX = MyX.createNewMyXByCommand(registerMyXCommand);
+        MyX savedMyX = registerMyXPort.registerNewMyX(newMyX);
+
+        UpdateMyXRequest updateMyXRequest = new UpdateMyXRequest(savedMyX.getId(), myXName, myXBirth);
+
+        //when
+        ResultActions resultActions = mockMvc.perform(
+                put(GlobalUrl.MY_X_ROOT)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateMyXRequest))
+                        .headers(testHeader.getRequestHeaderWithMockAccessKey(userId))
+                        .accept(MediaType.APPLICATION_JSON));
+        //then
+        resultActions.andExpect(status().isOk())
+                .andDo(print())
+                .andDo(document("update-my-x",
+                                requestHeaders(
+                                        headerWithName(GlobalStatus.ACCESS_ID).description("서버 Access id"),
+                                        headerWithName(GlobalStatus.ACCESS_KEY).description("서버 Access key"),
+                                        headerWithName(GlobalStatus.ACCESS_TOKEN).description("유저의 access-token")
+                                ),
+                                requestFields(
+                                        fieldWithPath("myXId").type(JsonFieldType.NUMBER).description("수정할 My X ID"),
+                                        fieldWithPath("xsName").type(JsonFieldType.STRING).description("수정 새로운 My X의 이름"),
+                                        fieldWithPath("xsBirth").type(JsonFieldType.STRING).description("수정 새로운 My X의 생년월일")
+                                ),
+                                responseFields(
+                                        fieldWithPath("updateMyXSuccess").type(JsonFieldType.BOOLEAN).description("수정 완료 여부")
                                 )
                         )
                 );

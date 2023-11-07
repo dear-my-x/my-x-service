@@ -5,15 +5,19 @@ import com.onetwo.myxservice.adapter.in.web.config.TestConfig;
 import com.onetwo.myxservice.adapter.in.web.myx.mapper.MyXDtoMapper;
 import com.onetwo.myxservice.adapter.in.web.myx.request.DeleteMyXRequest;
 import com.onetwo.myxservice.adapter.in.web.myx.request.RegisterMyXRequest;
+import com.onetwo.myxservice.adapter.in.web.myx.request.UpdateMyXRequest;
 import com.onetwo.myxservice.adapter.in.web.myx.response.DeleteMyXResponse;
 import com.onetwo.myxservice.adapter.in.web.myx.response.MyXDetailsResponse;
 import com.onetwo.myxservice.adapter.in.web.myx.response.RegisterMyXResponse;
+import com.onetwo.myxservice.adapter.in.web.myx.response.UpdateMyXResponse;
 import com.onetwo.myxservice.application.port.in.command.DeleteMyXCommand;
 import com.onetwo.myxservice.application.port.in.command.MyXDetailsCommand;
 import com.onetwo.myxservice.application.port.in.command.RegisterMyXCommand;
+import com.onetwo.myxservice.application.port.in.command.UpdateMyXCommand;
 import com.onetwo.myxservice.application.port.in.response.DeleteMyXResponseDto;
 import com.onetwo.myxservice.application.port.in.response.MyXDetailResponseDto;
 import com.onetwo.myxservice.application.port.in.response.RegisterMyXResponseDto;
+import com.onetwo.myxservice.application.port.in.response.UpdateMyXResponseDto;
 import com.onetwo.myxservice.application.port.in.usecase.DeleteMyXUseCase;
 import com.onetwo.myxservice.application.port.in.usecase.ReadMyXUseCase;
 import com.onetwo.myxservice.application.port.in.usecase.RegisterMyXUseCase;
@@ -159,6 +163,30 @@ class MyXControllerTest {
         ResultActions resultActions = mockMvc.perform(
                 get(GlobalUrl.MY_X_ROOT)
                         .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON));
+        //then
+        resultActions.andExpect(status().isOk())
+                .andDo(print());
+    }
+
+    @Test
+    @WithMockUser(username = userId)
+    @DisplayName("[단위][Web Adapter] MyX 수정 - 성공 테스트")
+    void updateMyXSuccessTest() throws Exception {
+        //given
+        UpdateMyXRequest updateMyXRequest = new UpdateMyXRequest(myXId, myXName, myXBirth);
+        UpdateMyXCommand updateMyXCommand = new UpdateMyXCommand(userId, myXId, myXName, myXBirth);
+        UpdateMyXResponseDto updateMyXResponseDto = new UpdateMyXResponseDto(true);
+        UpdateMyXResponse updateMyXResponse = new UpdateMyXResponse(updateMyXResponseDto.updateMyXSuccess());
+
+        when(myXDtoMapper.updateRequestToCommand(anyString(), any(UpdateMyXRequest.class))).thenReturn(updateMyXCommand);
+        when(updateMyXUseCase.updateMyX(any(UpdateMyXCommand.class))).thenReturn(updateMyXResponseDto);
+        when(myXDtoMapper.dtoToUpdateResponse(any(UpdateMyXResponseDto.class))).thenReturn(updateMyXResponse);
+        //when
+        ResultActions resultActions = mockMvc.perform(
+                put(GlobalUrl.MY_X_ROOT)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateMyXRequest))
                         .accept(MediaType.APPLICATION_JSON));
         //then
         resultActions.andExpect(status().isOk())
