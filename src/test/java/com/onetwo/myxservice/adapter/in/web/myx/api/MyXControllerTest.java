@@ -17,6 +17,7 @@ import com.onetwo.myxservice.application.port.in.response.RegisterMyXResponseDto
 import com.onetwo.myxservice.application.port.in.usecase.DeleteMyXUseCase;
 import com.onetwo.myxservice.application.port.in.usecase.ReadMyXUseCase;
 import com.onetwo.myxservice.application.port.in.usecase.RegisterMyXUseCase;
+import com.onetwo.myxservice.application.port.in.usecase.UpdateMyXUseCase;
 import com.onetwo.myxservice.common.GlobalUrl;
 import com.onetwo.myxservice.common.config.SecurityConfig;
 import org.junit.jupiter.api.DisplayName;
@@ -68,9 +69,13 @@ class MyXControllerTest {
     private ReadMyXUseCase readMyXUseCase;
 
     @MockBean
+    private UpdateMyXUseCase updateMyXUseCase;
+
+    @MockBean
     private MyXDtoMapper myXDtoMapper;
 
     private final String userId = "testUserId";
+    private final Long myXId = 1L;
     private final String myXName = "정정일";
     private final Instant myXBirth = Instant.parse("1998-04-28T00:00:00Z");
 
@@ -103,8 +108,8 @@ class MyXControllerTest {
     @DisplayName("[단위][Web Adapter] MyX 삭제 - 성공 테스트")
     void deleteMyXSuccessTest() throws Exception {
         //given
-        DeleteMyXRequest deleteMyXRequest = new DeleteMyXRequest(myXName, myXBirth);
-        DeleteMyXCommand deleteMyXCommand = new DeleteMyXCommand(userId, myXName, myXBirth);
+        DeleteMyXRequest deleteMyXRequest = new DeleteMyXRequest(myXId);
+        DeleteMyXCommand deleteMyXCommand = new DeleteMyXCommand(userId, myXId);
         DeleteMyXResponseDto deleteMyXResponseDto = new DeleteMyXResponseDto(true);
         DeleteMyXResponse deleteMyXResponse = new DeleteMyXResponse(deleteMyXResponseDto.isDeleteSuccess());
 

@@ -9,7 +9,6 @@ import com.onetwo.myxservice.domain.MyX;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -30,11 +29,11 @@ public class MyXPersistenceAdapter implements ReadMyXPort, RegisterMyXPort, Upda
     }
 
     @Override
-    public Optional<MyX> findByUserIdAndXsNameAndXsBirth(String userId, String xsName, Instant xsBirth) {
-        Optional<MyXEntity> optionalMyXEntity = myXRepository.findByUserIdAndXsNameAndXsBirthAndState(userId, xsName, xsBirth, false);
+    public Optional<MyX> findById(Long id) {
+        Optional<MyXEntity> myXEntity = myXRepository.findById(id);
 
-        if (optionalMyXEntity.isPresent()) {
-            MyX myX = MyX.entityToDomain(optionalMyXEntity.get());
+        if (myXEntity.isPresent()) {
+            MyX myX = MyX.entityToDomain(myXEntity.get());
 
             return Optional.of(myX);
         }

@@ -22,7 +22,7 @@ import java.time.Instant;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
@@ -41,6 +41,7 @@ class DeleteMyXUseCaseTest {
     private MyXUseCaseConverter myXUseCaseConverter;
 
     private final String userId = "testUserId";
+    private final Long myXId = 1L;
     private final String myXName = "정정일";
     private final Instant myXBirth = Instant.parse("1998-04-28T00:00:00Z");
 
@@ -48,14 +49,14 @@ class DeleteMyXUseCaseTest {
     @DisplayName("[단위][Use Case] MyX 삭제 - 성공 테스트")
     void deleterMyXUseCaseSuccessTest() {
         //given
-        DeleteMyXCommand deleteMyXCommand = new DeleteMyXCommand(userId, myXName, myXBirth);
+        DeleteMyXCommand deleteMyXCommand = new DeleteMyXCommand(userId, myXId);
 
         RegisterMyXCommand registerMyXCommand = new RegisterMyXCommand(userId, myXName, myXBirth);
         MyX myX = MyX.createNewMyXByCommand(registerMyXCommand);
 
         DeleteMyXResponseDto deleteMyXResponseDto = new DeleteMyXResponseDto(true);
 
-        given(readMyXPort.findByUserIdAndXsNameAndXsBirth(anyString(), anyString(), any(Instant.class))).willReturn(Optional.of(myX));
+        given(readMyXPort.findById(anyLong())).willReturn(Optional.of(myX));
         given(myXUseCaseConverter.myXToDeleteMyXResponseDto(any(MyX.class))).willReturn(deleteMyXResponseDto);
         //when
         DeleteMyXResponseDto result = deleteMyXUseCase.deleteMyX(deleteMyXCommand);
@@ -68,9 +69,9 @@ class DeleteMyXUseCaseTest {
     @DisplayName("[단위][Use Case] MyX 삭제 my x does not exist - 실패 테스트")
     void deleterMyXUseCaseMyXDoesNotExistFailTest() {
         //given
-        DeleteMyXCommand deleteMyXCommand = new DeleteMyXCommand(userId, myXName, myXBirth);
+        DeleteMyXCommand deleteMyXCommand = new DeleteMyXCommand(userId, myXId);
 
-        given(readMyXPort.findByUserIdAndXsNameAndXsBirth(anyString(), anyString(), any(Instant.class))).willReturn(Optional.empty());
+        given(readMyXPort.findById(anyLong())).willReturn(Optional.empty());
 
         //when then
         Assertions.assertThrows(NotFoundResourceException.class, () -> deleteMyXUseCase.deleteMyX(deleteMyXCommand));
@@ -80,14 +81,33 @@ class DeleteMyXUseCaseTest {
     @DisplayName("[단위][Use Case] MyX 삭제 my x already deleted - 실패 테스트")
     void deleterMyXUseCaseMyXAlreadyDeletedFailTest() {
         //given
-        DeleteMyXCommand deleteMyXCommand = new DeleteMyXCommand(userId, myXName, myXBirth);
+        DeleteMyXCommand deleteMyXCommand = new DeleteMyXCommand(userId, myXId);
 
         RegisterMyXCommand registerMyXCommand = new RegisterMyXCommand(userId, myXName, myXBirth);
         MyX myX = MyX.createNewMyXByCommand(registerMyXCommand);
 
         myX.deleteMyX();
 
-        given(readMyXPort.findByUserIdAndXsNameAndXsBirth(anyString(), anyString(), any(Instant.class))).willReturn(Optional.of(myX));
+        given(readMyXPort.findById(anyLong())).willReturn(Optional.of(myX));
+
+        //when then
+        Assertions.assertThrows(BadRequestException.class, () -> deleteMyXUseCase.deleteMyX(deleteMyXCommand));
+    }
+
+    @Test
+    @DisplayName("[단위][Use Case] MyX 삭제 user not matched - 실패 테스트")
+    void deleterMyXUseCaseUserNotMatchedFailTest() {
+        //given
+        String requestUser = "testRequestUser";
+
+        DeleteMyXCommand deleteMyXCommand = new DeleteMyXCommand(requestUser, myXId);
+
+        RegisterMyXCommand registerMyXCommand = new RegisterMyXCommand(userId, myXName, myXBirth);
+        MyX myX = MyX.createNewMyXByCommand(registerMyXCommand);
+
+        myX.deleteMyX();
+
+        given(readMyXPort.findById(anyLong())).willReturn(Optional.of(myX));
 
         //when then
         Assertions.assertThrows(BadRequestException.class, () -> deleteMyXUseCase.deleteMyX(deleteMyXCommand));

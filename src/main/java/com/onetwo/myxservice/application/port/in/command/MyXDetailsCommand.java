@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotEmpty;
 import lombok.Getter;
 
 @Getter
-public class MyXDetailsCommand extends SelfValidating<DeleteMyXCommand> {
+public final class MyXDetailsCommand extends SelfValidating<DeleteMyXCommand> {
 
     @NotEmpty
     private final String userId;

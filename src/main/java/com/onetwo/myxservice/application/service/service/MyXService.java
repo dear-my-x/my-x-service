@@ -3,12 +3,15 @@ package com.onetwo.myxservice.application.service.service;
 import com.onetwo.myxservice.application.port.in.command.DeleteMyXCommand;
 import com.onetwo.myxservice.application.port.in.command.MyXDetailsCommand;
 import com.onetwo.myxservice.application.port.in.command.RegisterMyXCommand;
+import com.onetwo.myxservice.application.port.in.command.UpdateMyXCommand;
 import com.onetwo.myxservice.application.port.in.response.DeleteMyXResponseDto;
 import com.onetwo.myxservice.application.port.in.response.MyXDetailResponseDto;
 import com.onetwo.myxservice.application.port.in.response.RegisterMyXResponseDto;
+import com.onetwo.myxservice.application.port.in.response.UpdateMyXResponseDto;
 import com.onetwo.myxservice.application.port.in.usecase.DeleteMyXUseCase;
 import com.onetwo.myxservice.application.port.in.usecase.ReadMyXUseCase;
 import com.onetwo.myxservice.application.port.in.usecase.RegisterMyXUseCase;
+import com.onetwo.myxservice.application.port.in.usecase.UpdateMyXUseCase;
 import com.onetwo.myxservice.application.port.out.MyXRegisterEventPublisherPort;
 import com.onetwo.myxservice.application.port.out.ReadMyXPort;
 import com.onetwo.myxservice.application.port.out.RegisterMyXPort;
@@ -29,7 +32,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class MyXService implements RegisterMyXUseCase, DeleteMyXUseCase, ReadMyXUseCase {
+public class MyXService implements RegisterMyXUseCase, DeleteMyXUseCase, ReadMyXUseCase, UpdateMyXUseCase {
 
     private final ReadMyXPort readMyXPort;
     private final RegisterMyXPort registerMyXPort;
@@ -88,14 +91,14 @@ public class MyXService implements RegisterMyXUseCase, DeleteMyXUseCase, ReadMyX
     @Override
     @Transactional
     public DeleteMyXResponseDto deleteMyX(DeleteMyXCommand deleteMyXCommand) {
-        Optional<MyX> optionalMyX = readMyXPort.findByUserIdAndXsNameAndXsBirth(
-                deleteMyXCommand.getUserId(),
-                deleteMyXCommand.getXsName(),
-                deleteMyXCommand.getXsBirth());
+        Optional<MyX> optionalMyX = readMyXPort.findById(deleteMyXCommand.getMyXId());
 
         if (optionalMyX.isEmpty()) throw new NotFoundResourceException("My x dose not exist");
 
         MyX myX = optionalMyX.get();
+
+        if (isRequestUserAndMyXRegisterUserNotSame(deleteMyXCommand.getUserId(), myX))
+            throw new BadRequestException("User is not same");
 
         if (myX.isDeleted()) throw new BadRequestException("My x already deleted");
 
@@ -104,6 +107,10 @@ public class MyXService implements RegisterMyXUseCase, DeleteMyXUseCase, ReadMyX
         updateMyXPort.updateMyX(myX);
 
         return myXUseCaseConverter.myXToDeleteMyXResponseDto(myX);
+    }
+
+    private boolean isRequestUserAndMyXRegisterUserNotSame(String userId, MyX myX) {
+        return !myX.getUserId().equals(userId);
     }
 
     /**
@@ -117,5 +124,12 @@ public class MyXService implements RegisterMyXUseCase, DeleteMyXUseCase, ReadMyX
         List<MyX> myXList = readMyXPort.findByUserId(myXDetailsCommand.getUserId());
 
         return myXList.stream().map(myXUseCaseConverter::myXToDetailResponseDto).toList();
+    }
+
+    @Override
+    public UpdateMyXResponseDto updateMyX(UpdateMyXCommand updateMyXCommand) {
+        Optional<MyX> optionalMyX = readMyXPort.findById(updateMyXCommand.getMyXId());
+
+        return null;
     }
 }

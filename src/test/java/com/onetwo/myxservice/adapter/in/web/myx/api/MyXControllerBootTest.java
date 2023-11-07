@@ -6,8 +6,10 @@ import com.onetwo.myxservice.adapter.in.web.myx.request.DeleteMyXRequest;
 import com.onetwo.myxservice.adapter.in.web.myx.request.RegisterMyXRequest;
 import com.onetwo.myxservice.application.port.in.command.RegisterMyXCommand;
 import com.onetwo.myxservice.application.port.in.usecase.RegisterMyXUseCase;
+import com.onetwo.myxservice.application.port.out.RegisterMyXPort;
 import com.onetwo.myxservice.common.GlobalStatus;
 import com.onetwo.myxservice.common.GlobalUrl;
+import com.onetwo.myxservice.domain.MyX;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,7 +51,11 @@ class MyXControllerBootTest {
     @Autowired
     private RegisterMyXUseCase registerMyXUseCase;
 
+    @Autowired
+    private RegisterMyXPort registerMyXPort;
+
     private final String userId = "testUserId";
+    private final Long myXId = 1L;
     private final String myXName = "정정일";
     private final Instant myXBirth = Instant.parse("1998-04-28T00:00:00Z");
 
@@ -93,10 +99,11 @@ class MyXControllerBootTest {
     @DisplayName("[통합][Web Adapter] MyX 삭제 - 성공 테스트")
     void deleteMyXSuccessTest() throws Exception {
         //given
-        DeleteMyXRequest deleteMyXRequest = new DeleteMyXRequest(myXName, myXBirth);
-
         RegisterMyXCommand registerMyXCommand = new RegisterMyXCommand(userId, myXName, myXBirth);
-        registerMyXUseCase.registerMyX(registerMyXCommand);
+        MyX newMyX = MyX.createNewMyXByCommand(registerMyXCommand);
+        MyX savedMyX = registerMyXPort.registerNewMyX(newMyX);
+
+        DeleteMyXRequest deleteMyXRequest = new DeleteMyXRequest(savedMyX.getId());
 
         //when
         ResultActions resultActions = mockMvc.perform(
@@ -115,8 +122,7 @@ class MyXControllerBootTest {
                                         headerWithName(GlobalStatus.ACCESS_TOKEN).description("유저의 access-token")
                                 ),
                                 requestFields(
-                                        fieldWithPath("xsName").type(JsonFieldType.STRING).description("삭제할 X의 이름"),
-                                        fieldWithPath("xsBirth").type(JsonFieldType.STRING).description("삭제할 X의 생년월일")
+                                        fieldWithPath("myXId").type(JsonFieldType.NUMBER).description("My X ID")
                                 ),
                                 responseFields(
                                         fieldWithPath("isDeleteSuccess").type(JsonFieldType.BOOLEAN).description("삭제 완료 여부")
