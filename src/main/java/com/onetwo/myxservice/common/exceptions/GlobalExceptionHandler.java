@@ -62,4 +62,10 @@ public class GlobalExceptionHandler {
         log.debug("ConstraintViolationException", e);
         return ResponseEntity.badRequest().body(e.getMessage());
     }
+
+    @ExceptionHandler(ResourceAlreadyFullException.class)
+    public ResponseEntity<String> resourceAlreadyFullException(ResourceAlreadyFullException e) {
+        log.debug("ResourceAlreadyFullException", e);
+        return ResponseEntity.badRequest().body(e.getMessage());
+    }
 }
