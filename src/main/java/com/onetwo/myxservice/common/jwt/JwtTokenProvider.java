@@ -1,6 +1,7 @@
 package com.onetwo.myxservice.common.jwt;
 
 import com.onetwo.myxservice.common.exceptions.TokenValidationException;
+import com.onetwo.myxservice.domain.RoleNames;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
@@ -11,24 +12,23 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
 import java.util.Base64;
+import java.util.HashSet;
+import java.util.Set;
 
 @Component
 @Slf4j
 public class JwtTokenProvider implements TokenProvider {
 
-    private final UserDetailsService userDetailsService;
     private final String secretKey;
 
-    public JwtTokenProvider(@Value("${jwt.secret-key}") String secretKey,
-                            UserDetailsService userDetailsService) {
+    public JwtTokenProvider(@Value("${jwt.secret-key}") String secretKey) {
         this.secretKey = secretKey;
-        this.userDetailsService = userDetailsService;
     }
 
     private Key key;
@@ -39,20 +39,20 @@ public class JwtTokenProvider implements TokenProvider {
         key = Keys.hmacShaKeyFor(encodedKey.getBytes());
     }
 
-
-    /**
-     * 토큰으로 부터 Authentication 객체를 얻어온다.
-     * Authentication 안에 user의 정보가 담겨있음.
-     * UsernamePasswordAuthenticationToken 객체로 Authentication을 쉽게 만들수 있으며,
-     * 매게변수로 UserDetails, pw, authorities 까지 넣어주면
-     * setAuthenticated(true)로 인스턴스를 생성해주고
-     * Spring-Security는 그것을 체크해서 로그인을 처리함
-     */
     @Override
     public Authentication getAuthentication(String token) {
         Claims claims = getClaimsByToken(token);
-        UserDetails userDetails = userDetailsService.loadUserByUsername(claims.getSubject());
-        return new UsernamePasswordAuthenticationToken(userDetails, token, userDetails.getAuthorities());
+        String userId = claims.getSubject();
+
+        Set<GrantedAuthority> authorities = getGrantedAuthoritiesByUserId(userId);
+
+        return new UsernamePasswordAuthenticationToken(userId, token, authorities);
+    }
+
+    private Set<GrantedAuthority> getGrantedAuthoritiesByUserId(String userId) {
+        Set<GrantedAuthority> authorities = new HashSet<>();
+        authorities.add(new SimpleGrantedAuthority(RoleNames.ROLE_USER.getValue()));
+        return authorities;
     }
 
     @Override
