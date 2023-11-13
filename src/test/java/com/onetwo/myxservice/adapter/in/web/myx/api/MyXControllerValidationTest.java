@@ -3,13 +3,11 @@ package com.onetwo.myxservice.adapter.in.web.myx.api;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onetwo.myxservice.adapter.in.web.config.TestConfig;
 import com.onetwo.myxservice.adapter.in.web.myx.mapper.MyXDtoMapper;
+import com.onetwo.myxservice.adapter.in.web.myx.request.ConnectMyXRequest;
 import com.onetwo.myxservice.adapter.in.web.myx.request.DeleteMyXRequest;
 import com.onetwo.myxservice.adapter.in.web.myx.request.RegisterMyXRequest;
 import com.onetwo.myxservice.adapter.in.web.myx.request.UpdateMyXRequest;
-import com.onetwo.myxservice.application.port.in.usecase.DeleteMyXUseCase;
-import com.onetwo.myxservice.application.port.in.usecase.ReadMyXUseCase;
-import com.onetwo.myxservice.application.port.in.usecase.RegisterMyXUseCase;
-import com.onetwo.myxservice.application.port.in.usecase.UpdateMyXUseCase;
+import com.onetwo.myxservice.application.port.in.usecase.*;
 import com.onetwo.myxservice.common.GlobalUrl;
 import com.onetwo.myxservice.common.config.SecurityConfig;
 import org.junit.jupiter.api.DisplayName;
@@ -59,6 +57,9 @@ class MyXControllerValidationTest {
 
     @MockBean
     private UpdateMyXUseCase updateMyXUseCase;
+
+    @MockBean
+    private ConnectMyXUseCase connectMyXUseCase;
 
     @MockBean
     private MyXDtoMapper myXDtoMapper;
@@ -176,6 +177,44 @@ class MyXControllerValidationTest {
                 put(GlobalUrl.MY_X_ROOT)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateMyXRequest))
+                        .accept(MediaType.APPLICATION_JSON));
+        //then
+        resultActions.andExpect(status().isBadRequest())
+                .andDo(print());
+    }
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    @WithMockUser(username = userId)
+    @DisplayName("[단위][Web Adapter] MyX 연결 xs user id validation fail - 실패 테스트")
+    void connectXsUserIdValidationFailTest(String testXsUserId) throws Exception {
+        //given
+        ConnectMyXRequest connectMyXRequest = new ConnectMyXRequest(myXId, testXsUserId);
+
+        //when
+        ResultActions resultActions = mockMvc.perform(
+                put(GlobalUrl.MY_X_CONNECT)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(connectMyXRequest))
+                        .accept(MediaType.APPLICATION_JSON));
+        //then
+        resultActions.andExpect(status().isBadRequest())
+                .andDo(print());
+    }
+
+    @ParameterizedTest
+    @NullSource
+    @WithMockUser(username = userId)
+    @DisplayName("[단위][Web Adapter] MyX 연결 my x id validation fail - 실패 테스트")
+    void connectMyXIdValidationFailTest(Long testMyXId) throws Exception {
+        //given
+        ConnectMyXRequest connectMyXRequest = new ConnectMyXRequest(testMyXId, userId);
+
+        //when
+        ResultActions resultActions = mockMvc.perform(
+                put(GlobalUrl.MY_X_CONNECT)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(connectMyXRequest))
                         .accept(MediaType.APPLICATION_JSON));
         //then
         resultActions.andExpect(status().isBadRequest())

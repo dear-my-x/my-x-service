@@ -3,25 +3,14 @@ package com.onetwo.myxservice.adapter.in.web.myx.api;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onetwo.myxservice.adapter.in.web.config.TestConfig;
 import com.onetwo.myxservice.adapter.in.web.myx.mapper.MyXDtoMapper;
+import com.onetwo.myxservice.adapter.in.web.myx.request.ConnectMyXRequest;
 import com.onetwo.myxservice.adapter.in.web.myx.request.DeleteMyXRequest;
 import com.onetwo.myxservice.adapter.in.web.myx.request.RegisterMyXRequest;
 import com.onetwo.myxservice.adapter.in.web.myx.request.UpdateMyXRequest;
-import com.onetwo.myxservice.adapter.in.web.myx.response.DeleteMyXResponse;
-import com.onetwo.myxservice.adapter.in.web.myx.response.MyXDetailsResponse;
-import com.onetwo.myxservice.adapter.in.web.myx.response.RegisterMyXResponse;
-import com.onetwo.myxservice.adapter.in.web.myx.response.UpdateMyXResponse;
-import com.onetwo.myxservice.application.port.in.command.DeleteMyXCommand;
-import com.onetwo.myxservice.application.port.in.command.MyXDetailsCommand;
-import com.onetwo.myxservice.application.port.in.command.RegisterMyXCommand;
-import com.onetwo.myxservice.application.port.in.command.UpdateMyXCommand;
-import com.onetwo.myxservice.application.port.in.response.DeleteMyXResponseDto;
-import com.onetwo.myxservice.application.port.in.response.MyXDetailResponseDto;
-import com.onetwo.myxservice.application.port.in.response.RegisterMyXResponseDto;
-import com.onetwo.myxservice.application.port.in.response.UpdateMyXResponseDto;
-import com.onetwo.myxservice.application.port.in.usecase.DeleteMyXUseCase;
-import com.onetwo.myxservice.application.port.in.usecase.ReadMyXUseCase;
-import com.onetwo.myxservice.application.port.in.usecase.RegisterMyXUseCase;
-import com.onetwo.myxservice.application.port.in.usecase.UpdateMyXUseCase;
+import com.onetwo.myxservice.adapter.in.web.myx.response.*;
+import com.onetwo.myxservice.application.port.in.command.*;
+import com.onetwo.myxservice.application.port.in.response.*;
+import com.onetwo.myxservice.application.port.in.usecase.*;
 import com.onetwo.myxservice.common.GlobalUrl;
 import com.onetwo.myxservice.common.config.SecurityConfig;
 import org.junit.jupiter.api.DisplayName;
@@ -76,12 +65,16 @@ class MyXControllerTest {
     private UpdateMyXUseCase updateMyXUseCase;
 
     @MockBean
+    private ConnectMyXUseCase connectMyXUseCase;
+
+    @MockBean
     private MyXDtoMapper myXDtoMapper;
 
     private final String userId = "testUserId";
     private final Long myXId = 1L;
     private final String myXName = "정정일";
     private final Instant myXBirth = Instant.parse("1998-04-28T00:00:00Z");
+    private final String xsUserId = "testMyXUserId";
 
     @Test
     @WithMockUser(username = userId)
@@ -187,6 +180,30 @@ class MyXControllerTest {
                 put(GlobalUrl.MY_X_ROOT)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateMyXRequest))
+                        .accept(MediaType.APPLICATION_JSON));
+        //then
+        resultActions.andExpect(status().isOk())
+                .andDo(print());
+    }
+
+    @Test
+    @WithMockUser(username = userId)
+    @DisplayName("[단위][Web Adapter] MyX 연결 - 성공 테스트")
+    void connectMyXSuccessTest() throws Exception {
+        //given
+        ConnectMyXRequest connectMyXRequest = new ConnectMyXRequest(myXId, xsUserId);
+        ConnectMyXCommand connectMyXCommand = new ConnectMyXCommand(userId, myXId, xsUserId);
+        ConnectMyXResponseDto connectMyXResponseDto = new ConnectMyXResponseDto(false, true);
+        ConnectMyXResponse connectMyXResponse = new ConnectMyXResponse(false, true);
+
+        when(myXDtoMapper.connectRequestToCommand(anyString(), any(ConnectMyXRequest.class))).thenReturn(connectMyXCommand);
+        when(connectMyXUseCase.connectMyX(any(ConnectMyXCommand.class))).thenReturn(connectMyXResponseDto);
+        when(myXDtoMapper.dtoToConnectResponse(any(ConnectMyXResponseDto.class))).thenReturn(connectMyXResponse);
+        //when
+        ResultActions resultActions = mockMvc.perform(
+                put(GlobalUrl.MY_X_CONNECT)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(connectMyXRequest))
                         .accept(MediaType.APPLICATION_JSON));
         //then
         resultActions.andExpect(status().isOk())

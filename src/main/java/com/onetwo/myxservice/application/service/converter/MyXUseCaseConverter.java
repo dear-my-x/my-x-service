@@ -1,9 +1,6 @@
 package com.onetwo.myxservice.application.service.converter;
 
-import com.onetwo.myxservice.application.port.in.response.DeleteMyXResponseDto;
-import com.onetwo.myxservice.application.port.in.response.MyXDetailResponseDto;
-import com.onetwo.myxservice.application.port.in.response.RegisterMyXResponseDto;
-import com.onetwo.myxservice.application.port.in.response.UpdateMyXResponseDto;
+import com.onetwo.myxservice.application.port.in.response.*;
 import com.onetwo.myxservice.domain.MyX;
 
 public interface MyXUseCaseConverter {
@@ -14,4 +11,6 @@ public interface MyXUseCaseConverter {
     MyXDetailResponseDto myXToDetailResponseDto(MyX myX);
 
     UpdateMyXResponseDto myXToUpdateResponseDto(boolean updateMyXSuccess);
+
+    ConnectMyXResponseDto myXToConnectResponseDto(MyX myX);
 }

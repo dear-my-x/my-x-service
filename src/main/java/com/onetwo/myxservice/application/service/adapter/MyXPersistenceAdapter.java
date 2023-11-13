@@ -42,6 +42,19 @@ public class MyXPersistenceAdapter implements ReadMyXPort, RegisterMyXPort, Upda
     }
 
     @Override
+    public Optional<MyX> findByUserIdAndXsUserId(String userId, String xsUserId) {
+        Optional<MyXEntity> myXEntity = myXRepository.findByUserIdAndXsUserId(userId, xsUserId);
+
+        if (myXEntity.isPresent()) {
+            MyX myX = MyX.entityToDomain(myXEntity.get());
+
+            return Optional.of(myX);
+        }
+
+        return Optional.empty();
+    }
+
+    @Override
     public MyX registerNewMyX(MyX newMyX) {
         MyXEntity newMyXEntity = MyXEntity.domainToEntity(newMyX);
 

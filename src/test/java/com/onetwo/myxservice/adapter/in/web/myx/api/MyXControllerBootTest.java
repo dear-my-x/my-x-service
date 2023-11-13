@@ -2,6 +2,7 @@ package com.onetwo.myxservice.adapter.in.web.myx.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onetwo.myxservice.adapter.in.web.config.TestHeader;
+import com.onetwo.myxservice.adapter.in.web.myx.request.ConnectMyXRequest;
 import com.onetwo.myxservice.adapter.in.web.myx.request.DeleteMyXRequest;
 import com.onetwo.myxservice.adapter.in.web.myx.request.RegisterMyXRequest;
 import com.onetwo.myxservice.adapter.in.web.myx.request.UpdateMyXRequest;
@@ -59,6 +60,7 @@ class MyXControllerBootTest {
     private final Long myXId = 1L;
     private final String myXName = "정정일";
     private final Instant myXBirth = Instant.parse("1998-04-28T00:00:00Z");
+    private final String xsUserId = "testMyXUserId";
 
 
     @Test
@@ -208,6 +210,45 @@ class MyXControllerBootTest {
                                 ),
                                 responseFields(
                                         fieldWithPath("updateMyXSuccess").type(JsonFieldType.BOOLEAN).description("수정 완료 여부")
+                                )
+                        )
+                );
+    }
+
+    @Test
+    @Transactional
+    @DisplayName("[통합][Web Adapter] MyX 연결 - 성공 테스트")
+    void connectMyXSuccessTest() throws Exception {
+        //given
+        RegisterMyXCommand registerMyXCommand = new RegisterMyXCommand(userId, myXName, myXBirth);
+        MyX newMyX = MyX.createNewMyXByCommand(registerMyXCommand);
+        MyX savedMyX = registerMyXPort.registerNewMyX(newMyX);
+
+        ConnectMyXRequest connectMyXRequest = new ConnectMyXRequest(savedMyX.getId(), xsUserId);
+
+        //when
+        ResultActions resultActions = mockMvc.perform(
+                put(GlobalUrl.MY_X_CONNECT)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(connectMyXRequest))
+                        .headers(testHeader.getRequestHeaderWithMockAccessKey(userId))
+                        .accept(MediaType.APPLICATION_JSON));
+        //then
+        resultActions.andExpect(status().isOk())
+                .andDo(print())
+                .andDo(document("connect-my-x",
+                                requestHeaders(
+                                        headerWithName(GlobalStatus.ACCESS_ID).description("서버 Access id"),
+                                        headerWithName(GlobalStatus.ACCESS_KEY).description("서버 Access key"),
+                                        headerWithName(GlobalStatus.ACCESS_TOKEN).description("유저의 access-token")
+                                ),
+                                requestFields(
+                                        fieldWithPath("myXId").type(JsonFieldType.NUMBER).description("연결할 My X ID"),
+                                        fieldWithPath("xsUserId").type(JsonFieldType.STRING).description("연결할 My X의 UserId")
+                                ),
+                                responseFields(
+                                        fieldWithPath("isConnected").type(JsonFieldType.BOOLEAN).description("상호 연결 여부"),
+                                        fieldWithPath("isReadyToConnect").type(JsonFieldType.BOOLEAN).description("연결 준비완료 여부")
                                 )
                         )
                 );

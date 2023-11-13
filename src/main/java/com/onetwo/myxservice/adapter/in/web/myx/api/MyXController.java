@@ -1,25 +1,14 @@
 package com.onetwo.myxservice.adapter.in.web.myx.api;
 
 import com.onetwo.myxservice.adapter.in.web.myx.mapper.MyXDtoMapper;
+import com.onetwo.myxservice.adapter.in.web.myx.request.ConnectMyXRequest;
 import com.onetwo.myxservice.adapter.in.web.myx.request.DeleteMyXRequest;
 import com.onetwo.myxservice.adapter.in.web.myx.request.RegisterMyXRequest;
 import com.onetwo.myxservice.adapter.in.web.myx.request.UpdateMyXRequest;
-import com.onetwo.myxservice.adapter.in.web.myx.response.DeleteMyXResponse;
-import com.onetwo.myxservice.adapter.in.web.myx.response.MyXDetailsResponse;
-import com.onetwo.myxservice.adapter.in.web.myx.response.RegisterMyXResponse;
-import com.onetwo.myxservice.adapter.in.web.myx.response.UpdateMyXResponse;
-import com.onetwo.myxservice.application.port.in.command.DeleteMyXCommand;
-import com.onetwo.myxservice.application.port.in.command.MyXDetailsCommand;
-import com.onetwo.myxservice.application.port.in.command.RegisterMyXCommand;
-import com.onetwo.myxservice.application.port.in.command.UpdateMyXCommand;
-import com.onetwo.myxservice.application.port.in.response.DeleteMyXResponseDto;
-import com.onetwo.myxservice.application.port.in.response.MyXDetailResponseDto;
-import com.onetwo.myxservice.application.port.in.response.RegisterMyXResponseDto;
-import com.onetwo.myxservice.application.port.in.response.UpdateMyXResponseDto;
-import com.onetwo.myxservice.application.port.in.usecase.DeleteMyXUseCase;
-import com.onetwo.myxservice.application.port.in.usecase.ReadMyXUseCase;
-import com.onetwo.myxservice.application.port.in.usecase.RegisterMyXUseCase;
-import com.onetwo.myxservice.application.port.in.usecase.UpdateMyXUseCase;
+import com.onetwo.myxservice.adapter.in.web.myx.response.*;
+import com.onetwo.myxservice.application.port.in.command.*;
+import com.onetwo.myxservice.application.port.in.response.*;
+import com.onetwo.myxservice.application.port.in.usecase.*;
 import com.onetwo.myxservice.common.GlobalUrl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +27,7 @@ public class MyXController {
     private final DeleteMyXUseCase deleteMyXUseCase;
     private final ReadMyXUseCase readMyXUseCase;
     private final UpdateMyXUseCase updateMyXUseCase;
+    private final ConnectMyXUseCase connectMyXUseCase;
     private final MyXDtoMapper myXDtoMapper;
 
     /**
@@ -93,5 +83,19 @@ public class MyXController {
         UpdateMyXCommand updateMyXCommand = myXDtoMapper.updateRequestToCommand(userId, updateMyXRequest);
         UpdateMyXResponseDto updateMyXResponseDto = updateMyXUseCase.updateMyX(updateMyXCommand);
         return ResponseEntity.ok().body(myXDtoMapper.dtoToUpdateResponse(updateMyXResponseDto));
+    }
+
+    /**
+     * Connect My X inbound adapter
+     *
+     * @param connectMyXRequest Request connect my x information
+     * @param userId            user authentication id
+     * @return Boolean about connect success and connect ready success
+     */
+    @PutMapping(GlobalUrl.MY_X_CONNECT)
+    public ResponseEntity<ConnectMyXResponse> connectMyX(@RequestBody @Valid ConnectMyXRequest connectMyXRequest, @AuthenticationPrincipal String userId) {
+        ConnectMyXCommand connectMyXCommand = myXDtoMapper.connectRequestToCommand(userId, connectMyXRequest);
+        ConnectMyXResponseDto connectMyXResponseDto = connectMyXUseCase.connectMyX(connectMyXCommand);
+        return ResponseEntity.ok().body(myXDtoMapper.dtoToConnectResponse(connectMyXResponseDto));
     }
 }

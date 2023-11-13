@@ -1,20 +1,12 @@
 package com.onetwo.myxservice.adapter.in.web.myx.mapper;
 
+import com.onetwo.myxservice.adapter.in.web.myx.request.ConnectMyXRequest;
 import com.onetwo.myxservice.adapter.in.web.myx.request.DeleteMyXRequest;
 import com.onetwo.myxservice.adapter.in.web.myx.request.RegisterMyXRequest;
 import com.onetwo.myxservice.adapter.in.web.myx.request.UpdateMyXRequest;
-import com.onetwo.myxservice.adapter.in.web.myx.response.DeleteMyXResponse;
-import com.onetwo.myxservice.adapter.in.web.myx.response.MyXDetailsResponse;
-import com.onetwo.myxservice.adapter.in.web.myx.response.RegisterMyXResponse;
-import com.onetwo.myxservice.adapter.in.web.myx.response.UpdateMyXResponse;
-import com.onetwo.myxservice.application.port.in.command.DeleteMyXCommand;
-import com.onetwo.myxservice.application.port.in.command.MyXDetailsCommand;
-import com.onetwo.myxservice.application.port.in.command.RegisterMyXCommand;
-import com.onetwo.myxservice.application.port.in.command.UpdateMyXCommand;
-import com.onetwo.myxservice.application.port.in.response.DeleteMyXResponseDto;
-import com.onetwo.myxservice.application.port.in.response.MyXDetailResponseDto;
-import com.onetwo.myxservice.application.port.in.response.RegisterMyXResponseDto;
-import com.onetwo.myxservice.application.port.in.response.UpdateMyXResponseDto;
+import com.onetwo.myxservice.adapter.in.web.myx.response.*;
+import com.onetwo.myxservice.application.port.in.command.*;
+import com.onetwo.myxservice.application.port.in.response.*;
 
 import java.util.List;
 
@@ -34,4 +26,8 @@ public interface MyXDtoMapper {
     UpdateMyXCommand updateRequestToCommand(String userId, UpdateMyXRequest updateMyXRequest);
 
     UpdateMyXResponse dtoToUpdateResponse(UpdateMyXResponseDto updateMyXResponseDto);
+
+    ConnectMyXCommand connectRequestToCommand(String userId, ConnectMyXRequest connectMyXRequest);
+
+    ConnectMyXResponse dtoToConnectResponse(ConnectMyXResponseDto connectMyXResponseDto);
 }

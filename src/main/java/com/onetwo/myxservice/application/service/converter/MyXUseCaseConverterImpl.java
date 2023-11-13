@@ -1,11 +1,9 @@
 package com.onetwo.myxservice.application.service.converter;
 
-import com.onetwo.myxservice.application.port.in.response.DeleteMyXResponseDto;
-import com.onetwo.myxservice.application.port.in.response.MyXDetailResponseDto;
-import com.onetwo.myxservice.application.port.in.response.RegisterMyXResponseDto;
-import com.onetwo.myxservice.application.port.in.response.UpdateMyXResponseDto;
+import com.onetwo.myxservice.application.port.in.response.*;
 import com.onetwo.myxservice.domain.MyX;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 @Component
 public class MyXUseCaseConverterImpl implements MyXUseCaseConverter {
@@ -35,5 +33,10 @@ public class MyXUseCaseConverterImpl implements MyXUseCaseConverter {
     @Override
     public UpdateMyXResponseDto myXToUpdateResponseDto(boolean updateMyXSuccess) {
         return new UpdateMyXResponseDto(updateMyXSuccess);
+    }
+
+    @Override
+    public ConnectMyXResponseDto myXToConnectResponseDto(MyX myX) {
+        return new ConnectMyXResponseDto(myX.isConnected(), StringUtils.hasText(myX.getXsUserId()));
     }
 }

@@ -9,4 +9,6 @@ public interface ReadMyXPort {
     List<MyX> findByUserId(String userId);
 
     Optional<MyX> findById(Long id);
+
+    Optional<MyX> findByUserIdAndXsUserId(String userId, String xsUserId);
 }

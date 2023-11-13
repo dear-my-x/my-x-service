@@ -47,7 +47,7 @@ class DeleteMyXUseCaseTest {
 
     @Test
     @DisplayName("[단위][Use Case] MyX 삭제 - 성공 테스트")
-    void deleterMyXUseCaseSuccessTest() {
+    void deleteMyXUseCaseSuccessTest() {
         //given
         DeleteMyXCommand deleteMyXCommand = new DeleteMyXCommand(userId, myXId);
 
@@ -67,7 +67,7 @@ class DeleteMyXUseCaseTest {
 
     @Test
     @DisplayName("[단위][Use Case] MyX 삭제 my x does not exist - 실패 테스트")
-    void deleterMyXUseCaseMyXDoesNotExistFailTest() {
+    void deleteMyXUseCaseMyXDoesNotExistFailTest() {
         //given
         DeleteMyXCommand deleteMyXCommand = new DeleteMyXCommand(userId, myXId);
 
@@ -79,7 +79,7 @@ class DeleteMyXUseCaseTest {
 
     @Test
     @DisplayName("[단위][Use Case] MyX 삭제 my x already deleted - 실패 테스트")
-    void deleterMyXUseCaseMyXAlreadyDeletedFailTest() {
+    void deleteMyXUseCaseMyXAlreadyDeletedFailTest() {
         //given
         DeleteMyXCommand deleteMyXCommand = new DeleteMyXCommand(userId, myXId);
 
@@ -96,7 +96,7 @@ class DeleteMyXUseCaseTest {
 
     @Test
     @DisplayName("[단위][Use Case] MyX 삭제 user not matched - 실패 테스트")
-    void deleterMyXUseCaseUserNotMatchedFailTest() {
+    void deleteMyXUseCaseUserNotMatchedFailTest() {
         //given
         String requestUser = "testRequestUser";
 

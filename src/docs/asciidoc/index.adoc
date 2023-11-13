@@ -158,3 +158,37 @@ include::{snippets}/update-my-x/response-body.adoc[]
 http-response
 
 include::{snippets}/update-my-x/http-response.adoc[]
+
+=== Connect My X
+
+http-request
+
+include::{snippets}/connect-my-x/http-request.adoc[]
+
+request-headers
+
+include::{snippets}/connect-my-x/request-headers.adoc[]
+
+request-fields
+
+include::{snippets}/connect-my-x/request-fields.adoc[]
+
+request-body
+
+include::{snippets}/connect-my-x/request-body.adoc[]
+
+curl-request
+
+include::{snippets}/connect-my-x/curl-request.adoc[]
+
+response-fields
+
+include::{snippets}/connect-my-x/response-fields.adoc[]
+
+response-body
+
+include::{snippets}/connect-my-x/response-body.adoc[]
+
+http-response
+
+include::{snippets}/connect-my-x/http-response.adoc[]

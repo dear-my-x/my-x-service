@@ -35,11 +35,11 @@ class DeleteMyXUseCaseBootTest {
     @DisplayName("[통합][Use Case] MyX 삭제 - 성공 테스트")
     void deleterMyXUseCaseSuccessTest() {
         //given
-        DeleteMyXCommand deleteMyXCommand = new DeleteMyXCommand(userId, myXId);
-
         RegisterMyXCommand registerMyXCommand = new RegisterMyXCommand(userId, myXName, myXBirth);
         MyX myX = MyX.createNewMyXByCommand(registerMyXCommand);
-        registerMyXPort.registerNewMyX(myX);
+        MyX savedMyX = registerMyXPort.registerNewMyX(myX);
+
+        DeleteMyXCommand deleteMyXCommand = new DeleteMyXCommand(userId, savedMyX.getId());
 
         //when
         DeleteMyXResponseDto result = deleteMyXUseCase.deleteMyX(deleteMyXCommand);

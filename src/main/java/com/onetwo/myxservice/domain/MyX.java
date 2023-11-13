@@ -1,6 +1,7 @@
 package com.onetwo.myxservice.domain;
 
 import com.onetwo.myxservice.adapter.out.persistence.entity.MyXEntity;
+import com.onetwo.myxservice.application.port.in.command.ConnectMyXCommand;
 import com.onetwo.myxservice.application.port.in.command.RegisterMyXCommand;
 import com.onetwo.myxservice.application.port.in.command.UpdateMyXCommand;
 import lombok.AccessLevel;
@@ -91,5 +92,11 @@ public class MyX extends BaseDomain {
         this.xsUserId = connectedMyX.getUserId();
 
         if (!connectedMyX.isConnected()) connectedMyX.connectMyX(this);
+    }
+
+    public void readyToConnect(ConnectMyXCommand connectMyXCommand) {
+        this.xsUserId = connectMyXCommand.getXsUserId();
+        setUpdatedAt(Instant.now());
+        setUpdateUser(connectMyXCommand.getUserId());
     }
 }

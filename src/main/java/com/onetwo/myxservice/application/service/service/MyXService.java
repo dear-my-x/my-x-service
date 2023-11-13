@@ -1,17 +1,8 @@
 package com.onetwo.myxservice.application.service.service;
 
-import com.onetwo.myxservice.application.port.in.command.DeleteMyXCommand;
-import com.onetwo.myxservice.application.port.in.command.MyXDetailsCommand;
-import com.onetwo.myxservice.application.port.in.command.RegisterMyXCommand;
-import com.onetwo.myxservice.application.port.in.command.UpdateMyXCommand;
-import com.onetwo.myxservice.application.port.in.response.DeleteMyXResponseDto;
-import com.onetwo.myxservice.application.port.in.response.MyXDetailResponseDto;
-import com.onetwo.myxservice.application.port.in.response.RegisterMyXResponseDto;
-import com.onetwo.myxservice.application.port.in.response.UpdateMyXResponseDto;
-import com.onetwo.myxservice.application.port.in.usecase.DeleteMyXUseCase;
-import com.onetwo.myxservice.application.port.in.usecase.ReadMyXUseCase;
-import com.onetwo.myxservice.application.port.in.usecase.RegisterMyXUseCase;
-import com.onetwo.myxservice.application.port.in.usecase.UpdateMyXUseCase;
+import com.onetwo.myxservice.application.port.in.command.*;
+import com.onetwo.myxservice.application.port.in.response.*;
+import com.onetwo.myxservice.application.port.in.usecase.*;
 import com.onetwo.myxservice.application.port.out.MyXRegisterEventPublisherPort;
 import com.onetwo.myxservice.application.port.out.ReadMyXPort;
 import com.onetwo.myxservice.application.port.out.RegisterMyXPort;
@@ -32,7 +23,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class MyXService implements RegisterMyXUseCase, DeleteMyXUseCase, ReadMyXUseCase, UpdateMyXUseCase {
+public class MyXService implements RegisterMyXUseCase, DeleteMyXUseCase, ReadMyXUseCase, UpdateMyXUseCase, ConnectMyXUseCase {
 
     private final ReadMyXPort readMyXPort;
     private final RegisterMyXPort registerMyXPort;
@@ -124,6 +115,7 @@ public class MyXService implements RegisterMyXUseCase, DeleteMyXUseCase, ReadMyX
      * @return user's my x list
      */
     @Override
+    @Transactional(readOnly = true)
     public List<MyXDetailResponseDto> getMyXDetails(MyXDetailsCommand myXDetailsCommand) {
         List<MyX> myXList = readMyXPort.findByUserId(myXDetailsCommand.getUserId());
 
@@ -138,6 +130,7 @@ public class MyXService implements RegisterMyXUseCase, DeleteMyXUseCase, ReadMyX
      * @return Boolean about update success
      */
     @Override
+    @Transactional
     public UpdateMyXResponseDto updateMyX(UpdateMyXCommand updateMyXCommand) {
         MyX myX = checkMyXExistAndGetMyX(updateMyXCommand.getMyXId());
 
@@ -152,5 +145,37 @@ public class MyXService implements RegisterMyXUseCase, DeleteMyXUseCase, ReadMyX
         updateMyXPort.updateMyX(myX);
 
         return myXUseCaseConverter.myXToUpdateResponseDto(true);
+    }
+
+    /**
+     * Connect My X use case,
+     * connect my x if two my x equal connect them,
+     * if not just ready for connect
+     *
+     * @param connectMyXCommand Request connect my x information
+     * @return Boolean about connect success and connect ready success
+     */
+    @Override
+    @Transactional
+    public ConnectMyXResponseDto connectMyX(ConnectMyXCommand connectMyXCommand) {
+        MyX myX = checkMyXExistAndGetMyX(connectMyXCommand.getMyXId());
+
+        if (isRequestUserAndMyXRegisterUserNotSame(connectMyXCommand.getUserId(), myX))
+            throw new BadRequestException("User is not same");
+
+        if (myX.isConnected())
+            throw new BadRequestException("My X already connected.");
+
+        Optional<MyX> optionalMyXsMyX = readMyXPort.findByUserIdAndXsUserId(connectMyXCommand.getXsUserId(), connectMyXCommand.getUserId());
+
+        if (optionalMyXsMyX.isPresent()) {
+            MyX myXsMyX = optionalMyXsMyX.get();
+            myX.connectMyX(myXsMyX);
+            updateMyXPort.updateMyX(myXsMyX);
+        } else myX.readyToConnect(connectMyXCommand);
+
+        updateMyXPort.updateMyX(myX);
+
+        return myXUseCaseConverter.myXToConnectResponseDto(myX);
     }
 }
