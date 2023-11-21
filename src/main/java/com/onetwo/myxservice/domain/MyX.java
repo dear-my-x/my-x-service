@@ -69,6 +69,8 @@ public class MyX extends BaseDomain {
 
     public void deleteMyX() {
         this.state = true;
+        setUpdatedAt(Instant.now());
+        setUpdateUser(this.userId);
     }
 
     public boolean isDeleted() {
