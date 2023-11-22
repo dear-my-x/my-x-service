@@ -51,7 +51,7 @@ public class LoggingFilter extends OncePerRequestFilter {
         log.info("Request : {} uri=[{}] request-ip=[{}] header=[{}] content-type=[{}] ",
                 request.getMethod(),
                 request.getRemoteAddr(),
-                queryString == null ? request.getRequestURI() : request.getRequestURI() + queryString,
+                queryString == null ? request.getRequestURI() : request.getRequestURI() + "?" + queryString,
                 getHeaders(request),
                 request.getContentType()
         );
